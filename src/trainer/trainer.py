@@ -5,6 +5,7 @@ import pandas as pd
 from src.logger.utils import plot_spectrogram
 from src.metrics.tracker import MetricTracker
 from src.trainer.base_trainer import BaseTrainer
+from src.metrics.utils import calc_si_sdr
 
 
 class Trainer(BaseTrainer):
@@ -89,13 +90,24 @@ class Trainer(BaseTrainer):
         self.writer.add_image("spectrogram", image)
 
     def log_predictions(
-        self, text, log_probs, log_probs_length, audio_path, examples_to_log=10, **batch
+        self, estimated, **batch
     ):
-        # TODO add all
+        s1_all = batch['s1']
+        s2_all = batch['s2']
+        tuples = list(zip(estimated, s1_all, s2_all))
+        for est, s1, s2 in tuples:
+            est_s1 = est[:, 0, :]
+            est_s2 = est[:, 2, :]
+            sisdr1 = calc_si_sdr(est_s1, s1)
+            sisdr2 = calc_si_sdr(est_s2, s2)
 
 
-        rows = {}
-        rows[Path(audio_path).name] = {}
-        self.writer.add_table(
-            "predictions", pd.DataFrame.from_dict(rows, orient="index")
-        )
+
+            rows = {}
+            rows[Path(audio_path).name] = {
+                "sisdr1" : sisdr1,
+                "sisdr2" : sisdr2
+            }
+            self.writer.add_table(
+                "predictions", pd.DataFrame.from_dict(rows, orient="index")
+            )
