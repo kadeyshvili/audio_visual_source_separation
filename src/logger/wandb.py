@@ -40,7 +40,7 @@ class WandBWriter:
         try:
             import wandb
 
-            wandb.login(key="c5c88c4d8b2474fb1d55c758fc6c1304df2f6b21")
+            wandb.login()
 
             self.run_id = run_id
 

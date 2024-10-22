@@ -1,9 +1,9 @@
 train:
   _target_: src.datasets.CustomDirDataset
-  audio_dir: "/Users/annal/hse4/avss_local/dla_dataset/audio/train"
+  audio_dir: "dla_dataset/audio/train"
   instance_transforms: ${transforms.instance_transforms.train}
 val:
   _target_: src.datasets.CustomDirDataset
-  audio_dir: "/Users/annal/hse4/avss_local/dla_dataset/audio/val"
+  audio_dir: "dla_dataset/audio/val"
   instance_transforms: ${transforms.instance_transforms.inference}
 
