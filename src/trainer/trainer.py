@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pandas as pd
+import torch
 
 from src.logger.utils import plot_spectrogram
 from src.metrics.tracker import MetricTracker
@@ -45,6 +46,7 @@ class Trainer(BaseTrainer):
 
         all_losses = self.criterion(**batch)
         batch.update(all_losses)
+        batch = self._update_predictions(**batch) # permute speakers 
 
         if self.is_train:
             batch["loss"].backward()  # sum of all losses is always called loss
@@ -59,6 +61,15 @@ class Trainer(BaseTrainer):
 
         for met in metric_funcs:
             metrics.update(met.name, met(**batch))
+        return batch
+
+    def _update_predictions(self, **batch):
+        """
+        Permute the speakers for each object in the batch according to criterion.
+        """
+        preds = batch["estimated"].clone()
+        preds[self.criterion.permute] = torch.flip(batch["estimated"][self.criterion.permute], dims=[1])
+        batch["estimated"] = preds
         return batch
 
     def _log_batch(self, batch_idx, batch, mode="train"):
@@ -78,10 +89,11 @@ class Trainer(BaseTrainer):
 
         # logging scheme might be different for different partitions
         if mode == "train":  # the method is called only every self.log_step steps
-            self.log_spectrogram(**batch)
+            # self.log_spectrogram(**batch)
+            self.log_predictions(**batch)
         else:
             # Log Stuff
-            self.log_spectrogram(**batch)
+            # self.log_spectrogram(**batch)
             self.log_predictions(**batch)
 
     def log_spectrogram(self, spectrogram, **batch):
@@ -90,23 +102,25 @@ class Trainer(BaseTrainer):
         self.writer.add_image("spectrogram", image)
 
     def log_predictions(
-        self, estimated, **batch
+        self, estimated, mix_path, examples_to_log=10, **batch
     ):
         s1_all = batch['s1']
         s2_all = batch['s2']
-        tuples = list(zip(estimated, s1_all, s2_all))
-        for est, s1, s2 in tuples:
-            est_s1 = est[:, 0, :]
-            est_s2 = est[:, 2, :]
+        tuples = list(zip(mix_path, estimated, s1_all, s2_all))
+        rows = {}
+        for path, est, s1, s2 in tuples[:examples_to_log]:
+            est_s1 = est[0, :]
+            est_s2 = est[1, :]
             sisdr1 = calc_si_sdr(est_s1, s1)
             sisdr2 = calc_si_sdr(est_s2, s2)
-
-
-
-            rows = {}
-            rows[Path(audio_path).name] = {
-                "sisdr1" : sisdr1,
-                "sisdr2" : sisdr2
+            
+            rows[Path(path).name] = {
+                "SI-SDR-s1" : sisdr1,
+                "SI-SDR-s2" : sisdr2,
+                "estimated_s1": self.writer.add_audio("estimated_s1", est_s1, 16000),
+                "estimated_s2": self.writer.add_audio("estimated_s2", est_s2, 16000),
+                "target_s1": self.writer.add_audio("target_s1", s1, 16000),
+                "target_s2": self.writer.add_audio("target_s2", s2, 16000)
             }
             self.writer.add_table(
                 "predictions", pd.DataFrame.from_dict(rows, orient="index")

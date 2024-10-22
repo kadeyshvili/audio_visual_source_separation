@@ -1,12 +1,9 @@
 train:
-  _target_: src.datasets.LibrispeechDataset
-  part: "train-clean-100"
+  _target_: src.datasets.CustomDirDataset
+  audio_dir: "/Users/annal/hse4/avss_local/dla_dataset/audio/train"
   instance_transforms: ${transforms.instance_transforms.train}
 val:
-  _target_: src.datasets.LibrispeechDataset
-  part: "dev-clean"
+  _target_: src.datasets.CustomDirDataset
+  audio_dir: "/Users/annal/hse4/avss_local/dla_dataset/audio/val"
   instance_transforms: ${transforms.instance_transforms.inference}
-test:
-  _target_: src.datasets.LibrispeechDataset
-  part: "test-clean"
-  instance_transforms: ${transforms.instance_transforms.inference}
+

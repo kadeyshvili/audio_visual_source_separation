@@ -35,8 +35,6 @@ class BaseDataset(Dataset):
             target_sr (int): supported sample rate.
             limit (int | None): if not None, limit the total number of elements
                 in the dataset to 'limit' elements.
-            max_audio_length (int): maximum allowed audio length.
-            max_test_length (int): maximum allowed text length.
             shuffle_index (bool): if True, shuffle the index. Uses python
                 random package with seed 42.
             instance_transforms (dict[Callable] | None): transforms that
@@ -71,7 +69,7 @@ class BaseDataset(Dataset):
         """
         data_dict = self._index[ind]
 
-        mix_path = data_dict["path"]
+        mix_path = data_dict["mix_path"]
         mix = self.load_audio(mix_path)
 
         s1_path = data_dict["s1_path"]
@@ -95,14 +93,19 @@ class BaseDataset(Dataset):
             "mouth_s1": mouth_s1,
             "mouth_s2": mouth_s2,
             "audio_len": audio_len,
+            "mix_path": mix_path
         }
 
         instance_data = self.preprocess_data(instance_data)
+        spectrogram_mix = self.get_spectrogram(instance_data["mix"])
+        spectrogram_s1 = self.get_spectrogram(instance_data["s1"])
+        spectrogram_s2 = self.get_spectrogram(instance_data["s2"])
 
-        spectrogram = self.get_spectrogram(instance_data["mix"])
         instance_data.update(
             {
-                "spectrogram": spectrogram,
+                "spectrogram": spectrogram_mix,
+                "spectrogram_s1" : spectrogram_s1,
+                "spectrogram_s2": spectrogram_s2
             }
         )
 
@@ -115,7 +118,7 @@ class BaseDataset(Dataset):
         return len(self._index)
 
     def load_audio(self, path):
-        if not Path(path).exists():
+        if path == "" or not Path(path).exists():
             return None
         audio_tensor, sr = torchaudio.load(path)
         audio_tensor = audio_tensor[0:1, :]  # remove all channels but the first
@@ -125,7 +128,7 @@ class BaseDataset(Dataset):
         return audio_tensor
 
     def load_mouth(self, path):
-        if not Path(path).exists():
+        if path == "" or not Path(path).exists():
             return None
         return torch.Tensor(np.load(path), dtype=float)
 
@@ -139,6 +142,8 @@ class BaseDataset(Dataset):
         Returns:
             spectrogram (Tensor): spectrogram for the audio.
         """
+        if audio is None:
+            return None
         return self.instance_transforms["get_spectrogram"](audio)
 
     def preprocess_data(self, instance_data):
@@ -179,11 +184,11 @@ class BaseDataset(Dataset):
             assert "mix_path" in entry, (
                 "Each dataset item should include field 'path'" " - path to audio file."
             )
-            assert "s1" in entry, (
+            assert "s1_path" in entry, (
                 "Each dataset item should include field 's1'"
                 " - ground truth for the speaker s1."
             )
-            assert "s2" in entry, (
+            assert "s2_path" in entry, (
                 "Each dataset item should include field 's2'"
                 " - ground truth for the speaker s2."
             )

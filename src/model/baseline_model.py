@@ -7,51 +7,42 @@ class BaselineModel(nn.Module):
     Simple MLP
     """
 
-    def __init__(self, n_feats, n_tokens, fc_hidden=512):
+    def __init__(self, n_feats, fc_hidden=512):
         """
         Args:
             n_feats (int): number of input features.
-            n_tokens (int): number of tokens in the vocabulary.
             fc_hidden (int): number of hidden features.
         """
         super().__init__()
 
-        self.net = Sequential(
+        self.net1 = Sequential(
             # people say it can approximate any function...
             nn.Linear(in_features=n_feats, out_features=fc_hidden),
             nn.ReLU(),
             nn.Linear(in_features=fc_hidden, out_features=fc_hidden),
             nn.ReLU(),
-            nn.Linear(in_features=fc_hidden, out_features=n_tokens),
+            nn.Linear(in_features=fc_hidden, out_features=n_feats),
         )
 
-    def forward(self, spectrogram, spectrogram_length, **batch):
+        self.net2 = Sequential(
+            nn.Linear(in_features=1, out_features=16),
+            nn.ReLU(),
+            nn.Linear(in_features=16, out_features=2)
+        )
+
+    def forward(self, mix, **batch):
         """
         Model forward method.
 
         Args:
-            spectrogram (Tensor): input spectrogram.
-            spectrogram_length (Tensor): spectrogram original lengths.
+            mix audio (Tensor): (B x L)
         Returns:
-            output (dict): output dict containing log_probs and
-                transformed lengths.
+            output (dict): output dict containing estimated sources. ("estimated" : Tensor B x 2 x L)
         """
-        output = self.net(spectrogram.transpose(1, 2))
-        log_probs = nn.functional.log_softmax(output, dim=-1)
-        log_probs_length = self.transform_input_lengths(spectrogram_length)
-        return {"log_probs": log_probs, "log_probs_length": log_probs_length}
-
-    def transform_input_lengths(self, input_lengths):
-        """
-        As the network may compress the Time dimension, we need to know
-        what are the new temporal lengths after compression.
-
-        Args:
-            input_lengths (Tensor): old input lengths
-        Returns:
-            output_lengths (Tensor): new temporal lengths
-        """
-        return input_lengths  # we don't reduce time dimension here
+        output = self.net1(mix)
+        output = output.unsqueeze(1)
+        output = self.net2(output.transpose(1, -1)).transpose(1, -1)
+        return {"estimated": output}
 
     def __str__(self):
         """

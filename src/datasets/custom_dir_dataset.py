@@ -24,11 +24,12 @@ class CustomDirDataset(BaseDataset):
                     Path(audio_dir + "/s1").exists()
                     and Path(audio_dir + "/s2").exists()
                 ):
-                    entry["s1_path"] = audio_dir + "/s1" + str(path.stem()) + ".wav"
-                    entry["s2_path"] = audio_dir + "/s2" + str(path.stem()) + ".wav"
+
+                    entry["s1_path"] = audio_dir + "/s1/" + str(path.stem) + ".wav"
+                    entry["s2_path"] = audio_dir + "/s2/" + str(path.stem) + ".wav"
 
                 if mouths_dir and Path(mouths_dir).exists():
-                    user1, user2 = path.stem().split("_")
+                    user1, user2 = Path(path).stem.split("_")
                     entry["mouth_s1_path"] = Path(mouths_dir) / (user1 + ".npz")
                     entry["mouth_s2_path"] = Path(mouths_dir) / (user2 + ".npz")
 
