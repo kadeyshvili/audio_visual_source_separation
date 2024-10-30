@@ -58,15 +58,14 @@ class TCN(nn.Module):
         return nn.ModuleList(cur_layers_arr)
     
     def forward(self, x):
-        self.repeats_input = self.input_conv(self.layer_norm(x.transpose(1, 2)).transpose(1, 2))
-        cur_input = self.repeats_input
-        skip_connection = torch.zeros(self.repeats_input.shape)
+        repeats_input = self.input_conv(self.layer_norm(x.transpose(1, 2)).transpose(1, 2))
+        cur_input = repeats_input
+        skip_connection = torch.zeros(repeats_input.shape).to(x.device)
         for i in range(len(self.repeats)):
             cur_input, skip_connection_cur = self.repeats[i](cur_input)
             skip_connection = skip_connection + skip_connection_cur
         return self.output_conv(self.activation(skip_connection))
 
-        
 
 class ConvTasNet(nn.Module):
     def __init__(self, input_window_size, latent_channel_size, embed_channel_size, block_channel_size, 
