@@ -1,0 +1,10 @@
+_target_: src.model.ConvTasNet
+input_window_size: 4
+latent_channel_size: 256
+embed_channel_size: 256
+block_channel_size: 512
+skip_connection_channel_size: 256
+n_blocks: 8
+n_repeats: 3
+kernel_size: 3
+sample_rate: ${trainer.sample_rate}

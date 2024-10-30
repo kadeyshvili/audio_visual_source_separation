@@ -1,12 +1,12 @@
 train:
   _target_: src.datasets.CustomDirDataset
-  audio_dir: "/Users/annal/hse4/avss_local/dla_dataset/audio/train"
+  audio_dir: "dla_dataset/audio/train"
   limit: 2
   instance_transforms: ${transforms.instance_transforms.train}
 # we filter partitions in one batch test to check the pipeline
 # do not filter test dataset, you want to evaluate on the whole dataset
 val:
   _target_: src.datasets.CustomDirDataset
-  audio_dir: "/Users/annal/hse4/avss_local/dla_dataset/audio/val"
+  audio_dir: "dla_dataset/audio/val"
   limit: 2
   instance_transforms: ${transforms.instance_transforms.inference}

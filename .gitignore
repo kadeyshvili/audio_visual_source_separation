@@ -107,6 +107,7 @@ saved/
 wandb/
 .cometml-runs/
 outputs/
+dla_dataset/
 src/lm
 
 # editor, os cache directory
