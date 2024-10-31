@@ -83,14 +83,12 @@ class ConvTasNet(nn.Module):
         self.encoder_dim = latent_channel_size
         self.padding_const = (self.input_window_size // 2)
 
-
     def get_residual_size(self, mix):
         assert len(mix.shape) in [1, 2], "Either single audio or batch of audios is supported"
         if len(mix.shape) == 1:
             mix = mix.unsqueeze(0)
         _, L = mix.shape
         return self.input_window_size - (self.padding_const + L % self.input_window_size) % self.input_window_size
-
 
     def pad_sequence(self, mix):
         """
@@ -114,7 +112,6 @@ class ConvTasNet(nn.Module):
         padding_2 = torch.zeros(B, padding_amount, requires_grad=True).type(mix.type())
         return torch.cat([padding_1, mix, padding_2], -1)
 
-
     def forward(self, mix, **batch):
         """
         Model forward method.
@@ -137,3 +134,18 @@ class ConvTasNet(nn.Module):
         unpadded_masked_output = masked_output[:, :, self.padding_const:-(residual_size + self.padding_const)].contiguous()
         total_output = unpadded_masked_output.view(B, self.num_speakers, -1)
         return {"estimated": total_output}
+
+    def __str__(self):
+        """
+        Model prints with the number of parameters.
+        """
+        all_parameters = sum([p.numel() for p in self.parameters()])
+        trainable_parameters = sum(
+            [p.numel() for p in self.parameters() if p.requires_grad]
+        )
+
+        result_info = super().__str__()
+        result_info = result_info + f"\nAll parameters: {all_parameters}"
+        result_info = result_info + f"\nTrainable parameters: {trainable_parameters}"
+
+        return result_info
