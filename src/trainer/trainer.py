@@ -93,7 +93,7 @@ class Trainer(BaseTrainer):
             loudness_normalized_est2 = torch.Tensor(pyln.normalize.loudness(est2, loudness_est2, loudness))
             est_normed[i] = torch.vstack([loudness_normalized_est1, loudness_normalized_est2])
 
-        batch["estimated"] = est_normed
+        batch["estimated"] = est_normed.to(self.device)
         return batch
         
 
