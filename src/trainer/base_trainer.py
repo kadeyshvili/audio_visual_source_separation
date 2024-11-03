@@ -142,6 +142,11 @@ class BaseTrainer:
         if config.trainer.get("from_pretrained") is not None:
             self._from_pretrained(config.trainer.get("from_pretrained"))
 
+        if config.trainer.get("target_sr") is None:
+            self.target_sr = 16000
+        else:
+            self.target_sr = config.trainer.get("target_sr")
+
     def train(self):
         """
         Wrapper around training process to save model on keyboard interrupt.

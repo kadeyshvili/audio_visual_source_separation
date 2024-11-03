@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 import torch
+import pyloudnorm as pyln
 
 from src.logger.utils import plot_spectrogram
 from src.metrics.tracker import MetricTracker
@@ -55,9 +56,12 @@ class Trainer(BaseTrainer):
             if self.lr_scheduler is not None:
                 self.lr_scheduler.step()
 
+
         # update metrics for each loss (in case of multiple losses)
         for loss_name in self.config.writer.loss_names:
             metrics.update(loss_name, batch[loss_name].item())
+
+        batch = self._loudness_norm(**batch) # normalize loudness
 
         for met in metric_funcs:
             metrics.update(met.name, met(**batch))
@@ -71,6 +75,28 @@ class Trainer(BaseTrainer):
         preds[self.criterion.permute] = torch.flip(batch["estimated"][self.criterion.permute], dims=[1])
         batch["estimated"] = preds
         return batch
+    
+    def _loudness_norm(self, **batch):
+        mix = batch['mix'].clone().detach().cpu().numpy()
+        est = batch["estimated"].clone().detach().cpu()
+        est_normed = torch.empty_like(est)
+        
+        meter = pyln.Meter(self.target_sr)
+        for i, (target, est1, est2) in enumerate(zip(mix, est[0, :], est[1, :])):
+            est1 = est1.numpy()
+            est2 = est2.numpy()
+            loudness = meter.integrated_loudness(target)
+            loudness_est1 = meter.integrated_loudness(est1)
+            loudness_est2 = meter.integrated_loudness(est2)
+
+            loudness_normalized_est1 = torch.Tensor(pyln.normalize.loudness(est1, loudness_est1, loudness))
+            loudness_normalized_est2 = torch.Tensor(pyln.normalize.loudness(est2, loudness_est2, loudness))
+            est_normed[i] = torch.vstack([loudness_normalized_est1, loudness_normalized_est2])
+
+        batch["estimated"] = est_normed
+        return batch
+        
+
 
     def _log_batch(self, batch_idx, batch, mode="train"):
         """
