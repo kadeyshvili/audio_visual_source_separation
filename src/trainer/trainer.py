@@ -77,26 +77,25 @@ class Trainer(BaseTrainer):
         return batch
     
     def _loudness_norm(self, **batch):
-        mix = batch['mix'].clone().detach().cpu().numpy()
-        est = batch["estimated"].clone().detach().cpu()
-        est_normed = torch.empty_like(est)
+        mix = batch['mix'].clone()
+        est = batch["estimated"].clone()
         
         meter = pyln.Meter(self.target_sr)
         for i, (target, est1, est2) in enumerate(zip(mix, est[0, :], est[1, :])):
-            est1 = est1.numpy()
-            est2 = est2.numpy()
+            target = target.detach().cpu().numpy()
+            est1 = est1.detach().cpu().numpy()
+            est2 = est2.detach().cpu().numpy()
             loudness = meter.integrated_loudness(target)
             loudness_est1 = meter.integrated_loudness(est1)
             loudness_est2 = meter.integrated_loudness(est2)
 
-            loudness_normalized_est1 = torch.Tensor(pyln.normalize.loudness(est1, loudness_est1, loudness))
-            loudness_normalized_est2 = torch.Tensor(pyln.normalize.loudness(est2, loudness_est2, loudness))
-            est_normed[i] = torch.vstack([loudness_normalized_est1, loudness_normalized_est2])
+            loudness_normalized_est1 = pyln.normalize.loudness(est1, loudness_est1, loudness)
+            loudness_normalized_est2 = pyln.normalize.loudness(est2, loudness_est2, loudness)
+            est[i] = torch.Tensor([loudness_normalized_est1, loudness_normalized_est2])
 
-        batch["estimated"] = est_normed.to(self.device)
+        batch["estimated"] = est.to(self.device)
         return batch
         
-
 
     def _log_batch(self, batch_idx, batch, mode="train"):
         """
