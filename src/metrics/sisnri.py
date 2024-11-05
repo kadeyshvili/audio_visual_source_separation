@@ -15,8 +15,8 @@ class SISNRiMetric(BaseMetric):
             sisnr1 = sisnr(est[0], target_s1)
             sisnr2 = sisnr(est[1], target_s2)
 
-            sisnr1m = sisnr(est[0], mix)
-            sisnr2m = sisnr(est[1], mix)
+            sisnr1m = sisnr(mix, target_s1)
+            sisnr2m = sisnr(mix, target_s2)
 
             sisnri_s.append(((sisnr1 - sisnr1m) + (sisnr2 - sisnr2m)) / 2)
         return sum(sisnri_s) / len(sisnri_s)
