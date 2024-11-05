@@ -69,10 +69,9 @@ class TCN(nn.Module):
 
 class ConvTasNet(nn.Module):
     def __init__(self, input_window_size, latent_channel_size, embed_channel_size, block_channel_size, 
-                 skip_connection_channel_size, n_blocks, n_repeats, kernel_size, sample_rate, num_speakers=2) -> None:
+                 skip_connection_channel_size, n_blocks, n_repeats, kernel_size, num_speakers=2) -> None:
         super().__init__()
-        MILLISECONDS_IN_SECOND = 1000
-        self.input_window_size = input_window_size * sample_rate // MILLISECONDS_IN_SECOND
+        self.input_window_size = input_window_size
 
         self.encoder = nn.Conv1d(1, latent_channel_size, self.input_window_size, stride=(self.input_window_size // 2), bias=False)
         self.tcn = TCN(latent_channel_size, embed_channel_size, block_channel_size, 
