@@ -4,8 +4,9 @@ from torchmetrics.audio import ScaleInvariantSignalNoiseRatio
 
 
 class SISNR(nn.Module):
-    def __init__(self):
+    def __init__(self, need_pit=True):
         super().__init__()
+        self.need_pit = need_pit
         self.si_snr_loss = ScaleInvariantSignalNoiseRatio()
         self.permute = []
 
@@ -15,15 +16,22 @@ class SISNR(nn.Module):
         Calculate the loss for each object in a batch, 
         save the best permutation and return the average loss over batch.
         """
-        self.permute = []
-        total_loss = []
-        for est, s1, s2 in zip(estimated, batch["s1"], batch["s2"]):
-            loss, permute = self._calc_pit_si_snr(est, s1, s2)
-            total_loss.append(loss)
-            self.permute.append(permute)
+
+        if self.need_pit:
+            self.permute = []
+            total_loss = []
+            for est, s1, s2 in zip(estimated, batch["s1"], batch["s2"]):
+                loss, permute = self._calc_pit_si_snr(est, s1, s2)
+                total_loss.append(loss)
+                self.permute.append(permute)
+        else:
+            total_loss = []
+            for est, target in zip(estimated, batch["target"]):
+                loss = self.si_snr_loss(est, target)
+                total_loss.append(loss)
 
         return {"loss" : -torch.mean(torch.stack(total_loss))}  # maximizing sisnr -> minimizing -sisnr
-    
+
     def _calc_pit_si_snr(self, estimated, s1, s2):
         """
         Calculate PIT SI-SNR for one object from a batch.
