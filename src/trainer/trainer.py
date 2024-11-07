@@ -47,7 +47,9 @@ class Trainer(BaseTrainer):
 
         all_losses = self.criterion(**batch)
         batch.update(all_losses)
-        batch = self._update_predictions(**batch) # permute speakers 
+        
+        if self.criterion.need_pit:
+            batch = self._update_predictions(**batch) # permute speakers
 
         if self.is_train:
             batch["loss"].backward()  # sum of all losses is always called loss
