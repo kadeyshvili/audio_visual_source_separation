@@ -102,7 +102,7 @@ class BaseDataset(Dataset):
     def load_mouth(self, path):
         if path == "" or not Path(path).exists():
             return None
-        return torch.Tensor(np.load(path), dtype=float)
+        return torch.from_numpy(np.load(path)['data']).unsqueeze(1) # 1 channel
 
     def get_spectrogram(self, audio):
         """
