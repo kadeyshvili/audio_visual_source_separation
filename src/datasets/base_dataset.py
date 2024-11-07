@@ -68,47 +68,19 @@ class BaseDataset(Dataset):
                 (a single dataset element).
         """
         data_dict = self._index[ind]
+        instance_data = {}
 
-        mix_path = data_dict["mix_path"]
-        mix = self.load_audio(mix_path)
+        for k, v in data_dict.items():
+            if k.split('_')[-1] == "path":
+                if v.split('.')[-1] == "wav":
+                    instance_data[k.split('_')[0]] = self.load_audio(v)
+                elif v.split('.')[-1] == "npz":
+                    instance_data[k.split('_')[0]] = self.load_mouth(v)
+            else:
+                instance_data[k] = v
+        instance_data["mix_path"] =  data_dict["mix_path"]
 
-        s1_path = data_dict["s1_path"]
-        s1 = self.load_audio(s1_path)
-
-        s2_path = data_dict["s2_path"]
-        s2 = self.load_audio(s2_path)
-
-        mouth_s1_path = data_dict["mouth_s1_path"]
-        mouth_s1 = self.load_mouth(mouth_s1_path)
-
-        mouth_s2_path = data_dict["mouth_s2_path"]
-        mouth_s2 = self.load_mouth(mouth_s2_path)
-
-        audio_len = data_dict["audio_len"]
-
-        instance_data = {
-            "mix": mix,
-            "s1": s1,
-            "s2": s2,
-            "mouth_s1": mouth_s1,
-            "mouth_s2": mouth_s2,
-            "audio_len": audio_len,
-            "mix_path": mix_path
-        }
-
-        instance_data = self.preprocess_data(instance_data)
-        spectrogram_mix = self.get_spectrogram(instance_data["mix"])
-        spectrogram_s1 = self.get_spectrogram(instance_data["s1"])
-        spectrogram_s2 = self.get_spectrogram(instance_data["s2"])
-
-        instance_data.update(
-            {
-                "spectrogram": spectrogram_mix,
-                "spectrogram_s1" : spectrogram_s1,
-                "spectrogram_s2": spectrogram_s2
-            }
-        )
-
+        instance_data = self.preprocess_data(instance_data)        
         return instance_data
 
     def __len__(self):

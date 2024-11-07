@@ -112,6 +112,15 @@ class BaseTrainer:
             if self.early_stop <= 0:
                 self.early_stop = inf
 
+        # dataset type for logging (full_target or single_target)
+        self.dataset_type = self.cfg_trainer.dataset_type
+
+        # bool parameter: if to apply loudness normalization
+        if config.trainer.get("loudness_norm") is not None:
+            self.loudness_norm = self.cfg_trainer.loudness_norm
+        else:
+            self.loudness_norm = True
+
         # setup visualization writer instance
         self.writer = writer
 

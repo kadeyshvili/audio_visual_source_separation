@@ -61,7 +61,8 @@ class Trainer(BaseTrainer):
         for loss_name in self.config.writer.loss_names:
             metrics.update(loss_name, batch[loss_name].item())
 
-        batch = self._loudness_norm(**batch) # normalize loudness
+        if self.loudness_norm:
+            batch = self._loudness_norm(**batch) # normalize loudness
 
         for met in metric_funcs:
             metrics.update(met.name, met(**batch))
@@ -78,23 +79,37 @@ class Trainer(BaseTrainer):
     
     def _loudness_norm(self, **batch):
         mix = batch['mix'].clone()
-        est = batch["estimated"].clone()
+        estimated = batch["estimated"].clone()
         
-        meter = pyln.Meter(self.target_sr)
-        for i, (target, est1, est2) in enumerate(zip(mix, est[0, :], est[1, :])):
-            target = target.detach().cpu().numpy()
-            est1 = est1.detach().cpu().numpy()
-            est2 = est2.detach().cpu().numpy()
-            loudness = meter.integrated_loudness(target)
-            loudness_est1 = meter.integrated_loudness(est1)
-            loudness_est2 = meter.integrated_loudness(est2)
+        if self.dataset_type == "full_target":
+            meter = pyln.Meter(self.target_sr)
+            for i, (target, est1, est2) in enumerate(zip(mix, estimated[0, :], estimated[1, :])):
+                target = target.detach().cpu().numpy()
+                est1 = est1.detach().cpu().numpy()
+                est2 = est2.detach().cpu().numpy()
+                loudness = meter.integrated_loudness(target)
+                loudness_est1 = meter.integrated_loudness(est1)
+                loudness_est2 = meter.integrated_loudness(est2)
 
-            loudness_normalized_est1 = pyln.normalize.loudness(est1, loudness_est1, loudness)
-            loudness_normalized_est2 = pyln.normalize.loudness(est2, loudness_est2, loudness)
-            est[i] = torch.Tensor([loudness_normalized_est1, loudness_normalized_est2])
+                loudness_normalized_est1 = pyln.normalize.loudness(est1, loudness_est1, loudness)
+                loudness_normalized_est2 = pyln.normalize.loudness(est2, loudness_est2, loudness)
+                estimated[i] = torch.Tensor([loudness_normalized_est1, loudness_normalized_est2])
 
-        batch["estimated"] = est.to(self.device)
-        return batch
+            batch["estimated"] = estimated.to(self.device)
+            return batch
+        else:
+            meter = pyln.Meter(self.target_sr)
+            for i, (target, est) in enumerate(zip(mix, estimated)):
+                target = target.detach().cpu().numpy()
+                est = est.detach().cpu().numpy()
+                loudness = meter.integrated_loudness(target)
+                loudness_est = meter.integrated_loudness(est)
+
+                loudness_normalized_est = pyln.normalize.loudness(est, loudness_est, loudness)
+                estimated[i] = torch.from_numpy(loudness_normalized_est)
+
+            batch["estimated"] = estimated.to(self.device)
+            return batch   
         
 
     def _log_batch(self, batch_idx, batch, mode="train"):
@@ -114,11 +129,9 @@ class Trainer(BaseTrainer):
 
         # logging scheme might be different for different partitions
         if mode == "train":  # the method is called only every self.log_step steps
-            # self.log_spectrogram(**batch)
             self.log_predictions(**batch)
         else:
             # Log Stuff
-            # self.log_spectrogram(**batch)
             self.log_predictions(**batch)
 
     def log_spectrogram(self, spectrogram, **batch):
@@ -129,24 +142,42 @@ class Trainer(BaseTrainer):
     def log_predictions(
         self, estimated, mix_path, examples_to_log=10, **batch
     ):
-        s1_all = batch['s1']
-        s2_all = batch['s2']
-        tuples = list(zip(mix_path, estimated, s1_all, s2_all))
-        rows = {}
-        for path, est, s1, s2 in tuples[:examples_to_log]:
-            est_s1 = est[0, :]
-            est_s2 = est[1, :]
-            sisdr1 = calc_si_sdr(est_s1, s1)
-            sisdr2 = calc_si_sdr(est_s2, s2)
+        if self.dataset_type == "full_target":
+            s1_all = batch['s1']
+            s2_all = batch['s2']
+            tuples = list(zip(mix_path, estimated, s1_all, s2_all))
+            rows = {}
+            for path, est, s1, s2 in tuples[:examples_to_log]:
+                est_s1 = est[0, :]
+                est_s2 = est[1, :]
+                sisdr1 = calc_si_sdr(est_s1, s1)
+                sisdr2 = calc_si_sdr(est_s2, s2)
+                
+                rows[Path(path).name] = {
+                    "SI-SDR-s1" : sisdr1,
+                    "SI-SDR-s2" : sisdr2,
+                    "estimated_s1": self.writer.add_audio("estimated_s1", est_s1, 16000),
+                    "estimated_s2": self.writer.add_audio("estimated_s2", est_s2, 16000),
+                    "target_s1": self.writer.add_audio("target_s1", s1, 16000),
+                    "target_s2": self.writer.add_audio("target_s2", s2, 16000)
+                }
+                self.writer.add_table(
+                    "predictions", pd.DataFrame.from_dict(rows, orient="index")
+                )
+        else:
             
-            rows[Path(path).name] = {
-                "SI-SDR-s1" : sisdr1,
-                "SI-SDR-s2" : sisdr2,
-                "estimated_s1": self.writer.add_audio("estimated_s1", est_s1, 16000),
-                "estimated_s2": self.writer.add_audio("estimated_s2", est_s2, 16000),
-                "target_s1": self.writer.add_audio("target_s1", s1, 16000),
-                "target_s2": self.writer.add_audio("target_s2", s2, 16000)
-            }
-            self.writer.add_table(
-                "predictions", pd.DataFrame.from_dict(rows, orient="index")
-            )
+            target_all = batch['target']
+            tuples = list(zip(mix_path, estimated, target_all))
+            rows = {}
+            for path, est, target in tuples[:examples_to_log]:
+                
+                sisdr = calc_si_sdr(est, target)
+                
+                rows[Path(path).name] = {
+                    "SI-SDR" : sisdr,
+                    "estimated": self.writer.add_audio("estimated", est, 16000),
+                    "target": self.writer.add_audio("target", target, 16000),
+                }
+                self.writer.add_table(
+                    "predictions", pd.DataFrame.from_dict(rows, orient="index")
+                )

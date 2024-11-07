@@ -32,3 +32,5 @@ trainer:
   save_dir: "saved"
   seed: 1
   sample_rate: 16000
+  dataset_type: "full_target"
+  loudness_norm: True
