@@ -85,7 +85,7 @@ class Trainer(BaseTrainer):
         
         if self.dataset_type == "full_target":
             meter = pyln.Meter(self.target_sr)
-            for i, (target, est1, est2) in enumerate(zip(mix, estimated[0, :], estimated[1, :])):
+            for i, (target, est1, est2) in enumerate(zip(mix, estimated[:, 0], estimated[:, 1])):
                 target = target.detach().cpu().numpy()
                 est1 = est1.detach().cpu().numpy()
                 est2 = est2.detach().cpu().numpy()
