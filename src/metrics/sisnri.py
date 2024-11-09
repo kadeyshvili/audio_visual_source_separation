@@ -17,8 +17,8 @@ class SISNRiMetric(BaseMetric):
                 sisnr1 = sisnr(est[0], target_s1)
                 sisnr2 = sisnr(est[1], target_s2)
 
-                sisnr1m = sisnr(target_s1, target_mix)
-                sisnr2m = sisnr(target_s2, target_mix)
+                sisnr1m = sisnr(target_mix, target_s1)
+                sisnr2m = sisnr(target_mix, target_s2)
 
                 sisnri_s.append(((sisnr1 - sisnr1m) + (sisnr2 - sisnr2m)) / 2)
             return sum(sisnri_s) / len(sisnri_s)
@@ -29,7 +29,7 @@ class SISNRiMetric(BaseMetric):
             for est, target, target_mix in zip(estimated, targets, mix):
 
                 sisnr_est = sisnr(est, target)
-                sisnr_mix = sisnr(target, target_mix)
+                sisnr_mix = sisnr(target_mix, target)
                 sisnri_s.append(sisnr_est - sisnr_mix)
 
             return sum(sisnri_s) / len(sisnri_s)
