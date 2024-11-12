@@ -1,3 +1,10 @@
 _target_: src.model.DPRNNTasNet
 input_size: 128
+feature_size: 128
 hidden_size: 128
+chunk_length: 200 
+kernel_size: 2
+n_repeats: 4
+bidirectional: True
+dropout: 0
+num_speakers: 2
