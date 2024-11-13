@@ -8,20 +8,15 @@ defaults:
   - _self_
 optimizer:
   _target_: torch.optim.AdamW
-  lr: 1e-2
+  lr: 3e-4
 lr_scheduler:
-  _target_: torch.optim.lr_scheduler.OneCycleLR
-  max_lr: 1e-2
-  pct_start: 0.1
-  steps_per_epoch: ${trainer.epoch_len}
-  epochs: ${trainer.n_epochs}
-  anneal_strategy: cos
+  _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
 loss_function:
   _target_: src.loss.SISNR
 trainer:
-  log_step: 25
-  n_epochs: 10
-  epoch_len: 500
+  log_step: 100
+  n_epochs: 100
+  epoch_len: 1000
   device_tensors: ["mix", "s1", "s2"] # which tensors should be on device (ex. GPU)
   resume_from: null # null or path to the checkpoint dir with *.pth and config.yaml
   device: auto # device name or "auto"
