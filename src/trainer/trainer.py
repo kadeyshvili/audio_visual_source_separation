@@ -56,10 +56,15 @@ class Trainer(BaseTrainer):
             self._clip_grad_norm()
             self.optimizer.step()
             if self.lr_scheduler is not None:
-                if isinstance(self.lr_scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
-                    self.lr_scheduler.step(batch["loss"])
-                else:
+                if not isinstance(self.lr_scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
                     self.lr_scheduler.step()
+                    
+        if not self.is_train:
+            if self.lr_scheduler is not None:
+                if isinstance(self.lr_scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
+                    self.lr_scheduler.step(batch['loss'])
+
+
 
 
         # update metrics for each loss (in case of multiple losses)
