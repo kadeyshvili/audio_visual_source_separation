@@ -1,0 +1,17 @@
+train:
+  mouth: 
+    _target_: torchvision.transforms.Compose
+    transforms:
+      - _target_: torchvision.transforms.Pad
+        padding: 8 # 96 -> 112
+      - _target_: torchvision.transforms.Grayscale
+      - _target_: src.transforms.video_augs.ChangeDtypeToFloat
+inference:
+  mouth: 
+    _target_: torchvision.transforms.Compose
+    transforms:
+    - _target_: torchvision.transforms.Pad
+      padding: 8 # 96 -> 112
+    - _target_: torchvision.transforms.Grayscale
+    - _target_: src.transforms.video_augs.ChangeDtypeToFloat
+

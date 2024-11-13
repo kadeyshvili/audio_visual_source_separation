@@ -1,0 +1,23 @@
+_target_: src.model.TDAVSS
+
+video_frontend3d_in_channels: 1 
+video_frontend3d_out_channels: 64
+video_embed_dim: 256
+
+audio_encoder_out_channels: 256
+audio_encoder_kernel_size: 40
+separation_res_conv_channels: 256
+separation_conv_out_channels: 512
+separation_conv_kernel_size: 3
+separation_audio_subblocks: 8
+
+video_encoder_out_channels: 256
+video_encoder_kernel_size: 3
+video_encoder_Drepeats: 5
+
+fused_out_channels: 256
+
+audio_sep_repeats: 1
+fused_sep_repeats: 3
+
+

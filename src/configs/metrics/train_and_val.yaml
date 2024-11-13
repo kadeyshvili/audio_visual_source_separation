@@ -1,0 +1,19 @@
+train:  # metrics that are calculated during training
+  - _target_: src.metrics.SISDRMetric
+    name: "SI-SDR" 
+  - _target_: src.metrics.SISNRMetric
+    name: "SI-SNR"
+  - _target_: src.metrics.SISNRiMetric
+    name: "SI-SNRi"
+  - _target_: src.metrics.PESQMetric
+    name: "PESQ"
+inference: # metrics that are calculated during inference (eval)
+  - _target_: src.metrics.SISDRMetric
+    name: "SI-SDR" 
+  - _target_: src.metrics.SISNRMetric
+    name: "SI-SNR"
+  - _target_: src.metrics.SISNRiMetric
+    name: "SI-SNRi"
+  - _target_: src.metrics.PESQMetric
+    name: "PESQ"
+

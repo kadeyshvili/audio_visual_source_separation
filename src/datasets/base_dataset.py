@@ -156,14 +156,6 @@ class BaseDataset(Dataset):
             assert "mix_path" in entry, (
                 "Each dataset item should include field 'path'" " - path to audio file."
             )
-            assert "s1_path" in entry, (
-                "Each dataset item should include field 's1'"
-                " - ground truth for the speaker s1."
-            )
-            assert "s2_path" in entry, (
-                "Each dataset item should include field 's2'"
-                " - ground truth for the speaker s2."
-            )
             assert "audio_len" in entry, (
                 "Each dataset item should include field 'audio_len'"
                 " - length of the audio."
