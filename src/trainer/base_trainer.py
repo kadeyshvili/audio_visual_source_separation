@@ -8,7 +8,7 @@ from tqdm.auto import tqdm
 from src.datasets.data_utils import inf_loop
 from src.metrics.tracker import MetricTracker
 from src.utils.io_utils import ROOT_PATH
-
+from src.utils.video_utils import load_pretrained_weights, download_pretrained_video
 
 class BaseTrainer:
     """
@@ -155,6 +155,9 @@ class BaseTrainer:
             self.target_sr = 16000
         else:
             self.target_sr = config.trainer.get("target_sr")
+
+        if config.trainer.get("video_model_pretrained") is not None:
+            self._video_model_from_pretrained(config.trainer.get("video_model_pretrained"))
 
     def train(self):
         """
@@ -570,3 +573,17 @@ class BaseTrainer:
             self.model.load_state_dict(checkpoint["state_dict"])
         else:
             self.model.load_state_dict(checkpoint)
+    
+    def _video_model_from_pretrained(self, video_model_pretrained_path):
+        """
+        Init video feature exractor model from pretrained pt/pth file.
+
+        """
+        if hasattr(self, "logger"):  # to support both trainer and inferencer
+            self.logger.info(f"Loading video feature extractor model weights from: {video_model_pretrained_path} ...")
+        else:
+            print(f"Loading video feature extractor model weights from: {video_model_pretrained_path} ...")
+        
+        download_pretrained_video(video_model_pretrained_path)
+        pretrained_dict = torch.load(video_model_pretrained_path, self.device)['model_state_dict']
+        load_pretrained_weights(self.model.video_emb_extractor, pretrained_dict)

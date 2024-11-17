@@ -64,9 +64,6 @@ class Trainer(BaseTrainer):
                 if isinstance(self.lr_scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
                     self.lr_scheduler.step(batch['loss'])
 
-
-
-
         # update metrics for each loss (in case of multiple losses)
         for loss_name in self.config.writer.loss_names:
             metrics.update(loss_name, batch[loss_name].item())
