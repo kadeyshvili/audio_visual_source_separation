@@ -15,7 +15,7 @@ class Trainer(BaseTrainer):
     Trainer class. Defines the logic of batch logging and processing.
     """
 
-    def process_batch(self, batch, metrics: MetricTracker):
+    def process_batch(self, batch, metrics: MetricTracker, batch_num: int = 0):
         """
         Run batch through the model, compute metrics, compute loss,
         and do training step (during training stage).
@@ -52,12 +52,17 @@ class Trainer(BaseTrainer):
             batch = self._update_predictions(**batch) # permute speakers
 
         if self.is_train:
-            batch["loss"].backward()  # sum of all losses is always called loss
+            if self.gradient_accumulation == 1:
+                batch["loss"].backward()  # sum of all losses is always called loss
+            else:
+                (batch["loss"] / self.gradient_accumulation).backward()
             self._clip_grad_norm()
-            self.optimizer.step()
-            if self.lr_scheduler is not None:
-                if not isinstance(self.lr_scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
-                    self.lr_scheduler.step()
+            if (batch_num + 1) % self.gradient_accumulation == 0:
+                self.optimizer.step()
+                if self.lr_scheduler is not None:
+                    if not isinstance(self.lr_scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
+                        self.lr_scheduler.step()
+            
                     
         if not self.is_train:
             if self.lr_scheduler is not None:
