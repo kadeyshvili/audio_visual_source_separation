@@ -33,9 +33,9 @@ class Collate:
             for item in dataset_items:
                 mix.append(item['mix'].squeeze(0))
                 mix_path.append(item['mix_path'])
-                s1.append(item['s1'].squeeze(0))
+                s1.append(item.get('s1', torch.Tensor([])).squeeze(0))
                 mouth_s1.append(item.get('mouths1', torch.Tensor([])))
-                s2.append(item['s2'].squeeze(0))
+                s2.append(item.get('s2', torch.Tensor([])).squeeze(0))
                 mouth_s2.append(item.get('mouths2', torch.Tensor([])))
 
             result_batch['mix'] = pad_sequence(mix, batch_first = True)
@@ -55,7 +55,7 @@ class Collate:
             for item in dataset_items:
                 mix.append(item['mix'].squeeze(0))
                 mix_path.append(item['mix_path'])
-                target.append(item['target'].squeeze(0))
+                target.append(item.get(['target'], torch.Tensor([])).squeeze(0))
                 mouth.append(item.get('mouth', torch.Tensor([])))
 
             result_batch['mix'] = pad_sequence(mix, batch_first = True)

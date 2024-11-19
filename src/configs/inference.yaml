@@ -6,8 +6,9 @@ defaults:
   - transforms: example
   - _self_
 inferencer:
-  device_tensors: ["data_object", "labels"] # which tensors should be on device (ex. GPU)
+  device_tensors: ["mix", "s1", "s2"] # which tensors should be on device (ex. GPU)
   device: auto # device name or "auto"
-  save_path: "example" # any name here, can be a dataset name
+  save_path: "out_dir" # any name here, can be a dataset name
   seed: 1
-  from_pretrained: "saved/model_best.pth" # path to the pretrained model
+  dataset_type: "full_target"
+  from_pretrained: "saved_model" # path to the pretrained model

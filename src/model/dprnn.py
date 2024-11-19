@@ -15,7 +15,7 @@ class LayerNormalization(nn.Module):
         dims = torch.arange(1, len(x.shape)).tolist()
         tuple_dims = tuple(dims)
         x_mean = torch.mean(x, dim=tuple_dims, keepdim=True)
-        x_var_squared = torch.var(x, dim=tuple_dims, keepdim=True, unbiased=False)
+        x_var_squared = torch.var(x, dim=tuple_dims, keepdim=True, correction=0)
         normalized_x = (x - x_mean) / torch.sqrt((x_var_squared + self.eps))
         return (normalized_x.transpose(1, -1) * self.z + self.r).transpose(1, -1)
 

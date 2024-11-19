@@ -20,7 +20,6 @@ class Inferencer(BaseTrainer):
         config,
         device,
         dataloaders,
-        text_encoder,
         save_path,
         metrics=None,
         batch_transforms=None,
@@ -55,13 +54,12 @@ class Inferencer(BaseTrainer):
 
         self.config = config
         self.cfg_trainer = self.config.inferencer
+        self.dataset_type = self.cfg_trainer.dataset_type
 
         self.device = device
 
         self.model = model
         self.batch_transforms = batch_transforms
-
-        self.text_encoder = text_encoder
 
         # define dataloaders
         self.evaluation_dataloaders = {k: v for k, v in dataloaders.items()}
@@ -120,8 +118,6 @@ class Inferencer(BaseTrainer):
                 the dataloader (possibly transformed via batch transform)
                 and model outputs.
         """
-        # TODO change inference logic so it suits ASR assignment
-        # and task pipeline
 
         batch = self.move_batch_to_device(batch)
         batch = self.transform_batch(batch)  # transform batch on device -- faster
@@ -133,29 +129,39 @@ class Inferencer(BaseTrainer):
             for met in self.metrics["inference"]:
                 metrics.update(met.name, met(**batch))
 
-        # Some saving logic. This is an example
-        # Use if you need to save predictions on disk
 
-        batch_size = batch["logits"].shape[0]
+        batch_size = batch["mix"].shape[0]
         current_id = batch_idx * batch_size
 
         for i in range(batch_size):
             # clone because of
             # https://github.com/pytorch/pytorch/issues/1995
-            logits = batch["logits"][i].clone()
-            label = batch["labels"][i].clone()
-            pred_label = logits.argmax(dim=-1)
+            if self.dataset_type=="full_target":
+                s1 = batch["estimated"][i][0].clone()
+                s2 = batch["estimated"][i][1].clone()
 
-            output_id = current_id + i
 
-            output = {
-                "pred_label": pred_label,
-                "label": label,
-            }
+                output_id = current_id + i
 
-            if self.save_path is not None:
-                # you can use safetensors or other lib here
-                torch.save(output, self.save_path / part / f"output_{output_id}.pth")
+                output = {
+                    "predicted_s1": s1,
+                    "predicted_s2": s2,
+                }
+
+                if self.save_path is not None:
+                    torch.save(output, self.save_path / part / f"output_{output_id}.pth")
+
+            else:
+                estimated = batch["estimated"][i].clone()
+
+                output_id = current_id + i
+
+                output = {
+                    "estimated": estimated,
+                }
+
+                if self.save_path is not None:
+                    torch.save(output, self.save_path / part / f"output_{output_id}.pth")
 
         return batch
 
@@ -189,7 +195,5 @@ class Inferencer(BaseTrainer):
                     batch_idx=batch_idx,
                     batch=batch,
                     part=part,
-                    metrics=self.evaluation_metrics,
+                    metrics=None,
                 )
-
-        return self.evaluation_metrics.result()

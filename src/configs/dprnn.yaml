@@ -11,6 +11,7 @@ optimizer:
   lr: 3e-4
 lr_scheduler:
   _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+  patience: 250000
 loss_function:
   _target_: src.loss.SISNR
 trainer:
