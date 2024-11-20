@@ -38,10 +38,12 @@ class CustomDirDataset(BaseDataset):
                     entry1 = {'mix_path': entry['mix_path'], 'audio_len': entry['audio_len']}
                     entry1['target_path'] = entry['s1_path']
                     entry1['mouth_path'] = entry['mouths1_path']
+                    entry1['speaker_folder'] = 's1'
 
                     entry2 = {'mix_path': entry['mix_path'], 'audio_len': entry['audio_len']}
                     entry2['target_path'] = entry['s2_path']
                     entry2['mouth_path'] = entry['mouths2_path']
+                    entry2['speaker_folder'] = 's2'
 
                     data.append(entry1)
                     data.append(entry2)

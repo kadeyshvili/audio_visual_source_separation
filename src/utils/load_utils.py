@@ -6,7 +6,7 @@ from src.utils.io_utils import ROOT_PATH
 
 URL_LINKS = {
     "pretrained_resnet": "179NgMsHo9TeZCLLtNWFVgRehDvzteMZE",
-    "best_model": "",
+    "tdavss": "1moIl03E-MvTcNtF-UXIrsf34pxphvFxw",
 }
 
 
@@ -25,7 +25,6 @@ def load_pretrained_weights(model, pretrained_dict):
 
 
 def download_pretrained_video(video_model_pretrained_path):
-
     path = ""
     if os.path.isabs(video_model_pretrained_path):
         if os.path.exists(video_model_pretrained_path):
@@ -46,16 +45,19 @@ def download_pretrained_video(video_model_pretrained_path):
     return path
 
 
-def download_best_model(path=None):
-    if path is None:
-        data_dir = ROOT_PATH / "data" / "models"
-        data_dir.mkdir(exist_ok=True, parents=True)
-        path = str(data_dir) + "best_model.pth"
+def download_best_model(pretrained_path=None):
+    path = ""
+    if os.path.isabs(pretrained_path):
+        if os.path.exists(pretrained_path):
+            return
     else:
-        dir = path[: -path[::-1].find("/")]
-        pathlib.Path(dir).mkdir(exist_ok=True, parents=True)
+        absolute_path = os.path.abspath(pretrained_path)
+        if os.path.exists(absolute_path):
+            return
+        else:
+            path = absolute_path
 
-    print("Downloading best model...")
-    gdown.download(id=URL_LINKS["best_model"], output=path)
-    print("\nBest model downloaded!")
-    return path
+    directory = os.path.dirname(path)
+    os.makedirs(directory, exist_ok=True)
+
+    gdown.download(id=URL_LINKS[pathlib.Path(pretrained_path).stem], output=path)

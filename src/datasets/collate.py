@@ -51,16 +51,19 @@ class Collate:
             mix_path = []
             target = []
             mouth = []
+            speaker_folders = []
             
             for item in dataset_items:
                 mix.append(item['mix'].squeeze(0))
                 mix_path.append(item['mix_path'])
-                target.append(item.get(['target'], torch.Tensor([])).squeeze(0))
+                target.append(item.get('target', torch.Tensor([])).squeeze(0))
                 mouth.append(item.get('mouth', torch.Tensor([])))
+                speaker_folders.append(item.get('speaker_folder', ""))
 
             result_batch['mix'] = pad_sequence(mix, batch_first = True)
             result_batch['target'] = pad_sequence(target, batch_first = True)
             result_batch['mouth'] = torch.stack(mouth, dim=0)
             result_batch['mix_path'] = mix_path
+            result_batch['speaker_folder'] = speaker_folders
 
         return result_batch

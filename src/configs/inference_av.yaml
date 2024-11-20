@@ -1,0 +1,14 @@
+defaults:
+  - model: baseline
+  - metrics: example
+  - datasets: example_eval_av # we do not want to run inference on training data
+  - dataloader: example
+  - transforms: tdavss
+  - _self_
+inferencer:
+  device_tensors: ["mix", "target"] # which tensors should be on device (ex. GPU)
+  device: auto # device name or "auto"
+  save_path: "out_dir" # any name here, can be a dataset name
+  seed: 1
+  dataset_type: "single_target"
+  from_pretrained: "data/best_model/tdavss.pth" # path to the pretrained model

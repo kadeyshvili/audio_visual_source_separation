@@ -149,13 +149,14 @@ class Inferencer(BaseTrainer):
 
             else:
                 estimated = batch["estimated"][i].clone()
-
+                speaker_folder = batch["speaker_folder"][i]
                 output = {
                     "estimated": estimated,
+                    "speaker_folder": speaker_folder
                 }
 
                 if self.save_path is not None:
-                    torch.save(output, self.save_path / part / f"{str(Path(mix_path).stem)}.pth")
+                    torch.save(output, self.save_path / part / f"{str(Path(mix_path).stem)}?{speaker_folder}.pth")
 
         return batch
 
