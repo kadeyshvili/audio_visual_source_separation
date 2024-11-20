@@ -91,11 +91,8 @@ class Inferencer(BaseTrainer):
             part_logs (dict): part_logs[part_name] contains logs
                 for the part_name partition.
         """
-        part_logs = {}
         for part, dataloader in self.evaluation_dataloaders.items():
-            logs = self._inference_part(part, dataloader)
-            part_logs[part] = logs
-        return part_logs
+            self._inference_part(part, dataloader)
 
     def process_batch(self, batch_idx, batch, metrics, part):
         """
