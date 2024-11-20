@@ -6,7 +6,7 @@ defaults:
   - transforms: tdavss
   - _self_
 inferencer:
-  device_tensors: ["mix", "target"] # which tensors should be on device (ex. GPU)
+  device_tensors: ["mix", "target", "mouth"] # which tensors should be on device (ex. GPU)
   device: auto # device name or "auto"
   save_path: "out_dir" # any name here, can be a dataset name
   seed: 1
