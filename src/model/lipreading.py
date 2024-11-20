@@ -122,3 +122,33 @@ class Lipreading(nn.Module):
 
         x = self.trunk(x)
         return x, (B, Tnew)
+    
+
+class VideoEmbedding(nn.Module):
+    """
+    Extracting features from lip videos.
+
+    in_channels: conv3D in_channels in frontend3D
+    out_channels: conv3D out_channels in frontend3D
+    embed_dim: video embedding dimention (fc layer after resnet)
+    """
+
+    def __init__(self, in_channels=1, out_channels=64,
+                 embed_dim=256):
+        super(VideoEmbedding, self).__init__()
+
+        self.feature_extractor = Lipreading(in_channels, out_channels )
+
+        self.fc = nn.Linear(512 * BasicBlock.expansion, embed_dim)
+        self.bnfc = nn.BatchNorm1d(embed_dim)
+
+    def forward(self, x):
+        x, (B, Tnew) = self.feature_extractor(x)
+
+        x = torch.flatten(x, 1)
+        x = self.fc(x)
+        x = self.bnfc(x)
+
+        x = x.view(B, Tnew, x.size(1))
+        x = x.transpose(1, 2).contiguous()
+        return x

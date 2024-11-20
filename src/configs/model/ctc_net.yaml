@@ -1,0 +1,32 @@
+_target_: src.model.CTCNet
+
+input_window_size: 21
+latent_channels: 512
+mouth_input_channels: 1
+mouth_latent_channels: 64
+num_joint_repeats: 3
+num_audio_repeats: 13
+audio_block_input_channels: 512
+audio_block_hidden_channels: 512
+audio_block_upsampling_depth: 4
+audio_block_kernel_size: 5
+audio_block_norm_type: 
+  _target_: hydra.utils.get_class
+  path: src.model.ctc_net.utils.GlobalLayerNorm
+audio_block_activation_type: 
+  _target_: hydra.utils.get_class
+  path: torch.nn.PReLU
+video_block_input_channels: 64
+video_block_hidden_channels: 64
+video_block_upsampling_depth: 4
+video_block_kernel_size: 3
+video_block_norm_type: 
+  _target_: hydra.utils.get_class
+  path: torch.nn.BatchNorm1d
+video_block_activation_type: 
+  _target_: hydra.utils.get_class
+  path: torch.nn.PReLU
+mask_activation: 
+  _target_: hydra.utils.get_class
+  path: torch.nn.ReLU
+num_speakers: 1

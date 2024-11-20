@@ -71,6 +71,7 @@ class BaseTrainer:
         self.optimizer = optimizer
         self.lr_scheduler = lr_scheduler
         self.batch_transforms = batch_transforms
+        self.gradient_accumulation = self.config["trainer"].get("gradient_accumulation", 1)
 
         # define dataloaders
         self.train_dataloader = dataloaders["train"]
@@ -226,6 +227,7 @@ class BaseTrainer:
                 batch = self.process_batch(
                     batch,
                     metrics=self.train_metrics,
+                    batch_num=batch_idx
                 )
             except torch.cuda.OutOfMemoryError as e:
                 if self.skip_oom:
