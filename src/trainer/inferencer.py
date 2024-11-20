@@ -3,6 +3,7 @@ from tqdm.auto import tqdm
 
 from src.metrics.tracker import MetricTracker
 from src.trainer.base_trainer import BaseTrainer
+from pathlib import Path
 
 
 class Inferencer(BaseTrainer):
@@ -136,12 +137,10 @@ class Inferencer(BaseTrainer):
         for i in range(batch_size):
             # clone because of
             # https://github.com/pytorch/pytorch/issues/1995
+            mix_path = batch['mix_path'][i]
             if self.dataset_type=="full_target":
                 s1 = batch["estimated"][i][0].clone()
                 s2 = batch["estimated"][i][1].clone()
-
-
-                output_id = current_id + i
 
                 output = {
                     "predicted_s1": s1,
@@ -149,19 +148,17 @@ class Inferencer(BaseTrainer):
                 }
 
                 if self.save_path is not None:
-                    torch.save(output, self.save_path / part / f"output_{output_id}.pth")
+                    torch.save(output, self.save_path / part / f"{str(Path(mix_path).stem)}.pth")
 
             else:
                 estimated = batch["estimated"][i].clone()
-
-                output_id = current_id + i
 
                 output = {
                     "estimated": estimated,
                 }
 
                 if self.save_path is not None:
-                    torch.save(output, self.save_path / part / f"output_{output_id}.pth")
+                    torch.save(output, self.save_path / part / f"{str(Path(mix_path).stem)}.pth")
 
         return batch
 
