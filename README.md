@@ -10,9 +10,8 @@
 
 ## About
 
-This repository contains a template for solving AVSS task with PyTorch. This template branch is a part of the [HSE DLA course](https://github.com/markovka17/dla) ASR homework.
-
 See the task assignment [here](https://github.com/markovka17/dla/tree/2024/project_avss).
+Authors: Vsevolod Kuybida, Polina Kadeyshvili, Anna Markovich
 
 ## Installation
 
