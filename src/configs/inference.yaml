@@ -12,3 +12,4 @@ inferencer:
   seed: 1
   dataset_type: "full_target"
   from_pretrained: "saved_model" # path to the pretrained model
+  sample_rate: 16000

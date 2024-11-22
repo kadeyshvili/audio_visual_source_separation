@@ -12,3 +12,4 @@ inferencer:
   seed: 1
   dataset_type: "single_target"
   from_pretrained: "data/best_model/tdavss.pth" # path to the pretrained model
+  sample_rate: 16000

@@ -1,4 +1,5 @@
 import torch
+import torchaudio
 from tqdm.auto import tqdm
 
 from src.metrics.tracker import MetricTracker
@@ -58,6 +59,7 @@ class Inferencer(BaseTrainer):
         self.dataset_type = self.cfg_trainer.dataset_type
 
         self.device = device
+        self.sample_rate = self.config.inferencer.get("sample_rate", 16000)
 
         self.model = model
         self.batch_transforms = batch_transforms
@@ -136,27 +138,20 @@ class Inferencer(BaseTrainer):
             # https://github.com/pytorch/pytorch/issues/1995
             mix_path = batch['mix_path'][i]
             if self.dataset_type=="full_target":
-                s1 = batch["estimated"][i][0].clone()
-                s2 = batch["estimated"][i][1].clone()
-
-                output = {
-                    "predicted_s1": s1,
-                    "predicted_s2": s2,
-                }
+                s1 = batch["estimated"][i][0].clone().unsqueeze(0)
+                s2 = batch["estimated"][i][1].clone().unsqueeze(0)
 
                 if self.save_path is not None:
-                    torch.save(output, self.save_path / part / f"{str(Path(mix_path).stem)}.pth")
+                    torchaudio.save(self.save_path / part /  "predicted_s1" / f"{str(Path(mix_path).stem)}.wav", s1, sample_rate=self.sample_rate)
+                if self.save_path is not None:
+                    torchaudio.save(self.save_path / part /  "predicted_s2" / f"{str(Path(mix_path).stem)}.wav", s2, sample_rate=self.sample_rate)
 
             else:
-                estimated = batch["estimated"][i].clone()
+                estimated = batch["estimated"][i].clone().unsqueeze(0)
                 speaker_folder = batch["speaker_folder"][i]
-                output = {
-                    "estimated": estimated,
-                    "speaker_folder": speaker_folder
-                }
 
                 if self.save_path is not None:
-                    torch.save(output, self.save_path / part / f"{str(Path(mix_path).stem)}?{speaker_folder}.pth")
+                    torchaudio.save(self.save_path / part / f"predicted_{speaker_folder}" /  f"{str(Path(mix_path).stem)}.wav", estimated, sample_rate=self.sample_rate)
 
         return batch
 
@@ -173,12 +168,13 @@ class Inferencer(BaseTrainer):
 
         self.is_train = False
         self.model.eval()
-
         self.evaluation_metrics.reset()
 
         # create Save dir
         if self.save_path is not None:
-            (self.save_path / part).mkdir(exist_ok=True, parents=True)
+            (self.save_path / part / "predicted_s1").mkdir(exist_ok=True, parents=True)
+        if self.save_path is not None:
+            (self.save_path / part / "predicted_s2").mkdir(exist_ok=True, parents=True)
 
         with torch.no_grad():
             for batch_idx, batch in tqdm(
