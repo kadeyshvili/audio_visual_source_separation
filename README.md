@@ -71,7 +71,7 @@ Where `CONFIG_NAME` is a config from `src/configs` and `HYDRA_CONFIG_ARGUMENTS` 
 run the following command (fill in the paths to a data set):
 
 ```bash
-python3 train.py -cn=tdavss  HYDRA_CONFIG_ARGUMENTS
+python3 train.py -cn="tdavss" trainer.n_epochs=79  HYDRA_CONFIG_ARGUMENTS
 ```
 
 ## How to run inference
