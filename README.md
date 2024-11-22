@@ -102,13 +102,13 @@ python3 compute_metrics.py --pred_dir <dir> --gt_dir <dir>
 
      train_loss     : -11.48
      
-     train_SI-SDR         : 9.95
+     train_SI-SDR   : 9.95
      
-     train_SI-SNR         : 11.48
+     train_SI-SNR   : 11.48
      
-     train_SI-SNRi        : 11.35
+     train_SI-SNRi  : 11.35
      
-     train_PESQ           : 1.98
+     train_PESQ     : 1.98
 
      val_loss       : -9.98
      
