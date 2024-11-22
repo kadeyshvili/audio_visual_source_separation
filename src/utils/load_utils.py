@@ -6,7 +6,7 @@ from src.utils.io_utils import ROOT_PATH
 
 URL_LINKS = {
     "pretrained_resnet": "179NgMsHo9TeZCLLtNWFVgRehDvzteMZE",
-    "tdavss": "1moIl03E-MvTcNtF-UXIrsf34pxphvFxw",
+    "tdavss": "1CtNHvv5auMMoAej6qxHQ6YN6GNK2e7La",
 }
 
 
@@ -61,3 +61,4 @@ def download_best_model(pretrained_path=None):
     os.makedirs(directory, exist_ok=True)
 
     gdown.download(id=URL_LINKS[pathlib.Path(pretrained_path).stem], output=path)
+    

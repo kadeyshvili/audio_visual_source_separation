@@ -578,6 +578,11 @@ class BaseTrainer:
             self.model.load_state_dict(checkpoint["state_dict"])
         else:
             self.model.load_state_dict(checkpoint)
+
+        if hasattr(self, "logger"):
+            self.logger.info("Downloaded!")
+        else:
+            print("Downloaded!")
     
     def _video_model_from_pretrained(self, video_model_pretrained_path):
         """
@@ -592,3 +597,8 @@ class BaseTrainer:
         download_pretrained_video(video_model_pretrained_path)
         pretrained_dict = torch.load(video_model_pretrained_path, self.device)['model_state_dict']
         load_pretrained_weights(self.model.video_emb_extractor, pretrained_dict)
+
+        if hasattr(self, "logger"):
+            self.logger.info("Downloaded!")
+        else:
+            print("Downloaded!")
