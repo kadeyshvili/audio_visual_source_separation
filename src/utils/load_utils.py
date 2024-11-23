@@ -6,7 +6,8 @@ from src.utils.io_utils import ROOT_PATH
 
 URL_LINKS = {
     "pretrained_resnet": "179NgMsHo9TeZCLLtNWFVgRehDvzteMZE",
-    "tdavss": "https://drive.google.com/file/d/1gEA-AwsHwPeOq3kT10JAwiSsd7EM1FWX/view?usp=sharing"
+    "tdavss": "https://drive.google.com/file/d/1gEA-AwsHwPeOq3kT10JAwiSsd7EM1FWX/view?usp=sharing",
+    "ctcnet": "https://drive.google.com/file/d/1iCQUvTOF3UPaMj6hdJUmjh3yTs8SoRf0/view?usp=sharing"
 }
 
 

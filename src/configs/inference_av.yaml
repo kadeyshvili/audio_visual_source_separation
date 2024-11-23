@@ -11,5 +11,5 @@ inferencer:
   save_path: "out_dir" # any name here, can be a dataset name
   seed: 1
   dataset_type: "single_target"
-  from_pretrained: "data/best_model/tdavss.pth" # path to the pretrained model
+  from_pretrained: "data/best_model/ctcnet.pth" # path to the pretrained model
   sample_rate: 16000

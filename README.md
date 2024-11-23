@@ -71,7 +71,7 @@ Where `CONFIG_NAME` is a config from `src/configs` and `HYDRA_CONFIG_ARGUMENTS` 
 run the following command (fill in the paths to a data set):
 
 ```bash
-python3 train.py -cn="tdavss" trainer.n_epochs=79  HYDRA_CONFIG_ARGUMENTS
+python3 train.py -cn="tdavss" trainer.n_epochs=100  HYDRA_CONFIG_ARGUMENTS
 ```
 
 ## How to run inference
@@ -97,27 +97,18 @@ python3 inference.py -cn "inference_av" HYDRA_CONFIG_ARGUMENTS
 python3 compute_metrics.py --pred_dir <dir> --gt_dir <dir>
 ```
 
-## Metrics of the best model (TDAVSS 79 epochs)
+## Metrics of the best model (CTCnet 100 epochs)
 
-     train_loss     : -11.48
-     
-     train_SI-SDR   : 9.95
-     
-     train_SI-SNR   : 11.48
-     
-     train_SI-SNRi  : 11.35
-     
-     train_PESQ     : 1.98
-
-     val_loss       : -9.98
-     
-     val_SI-SDR     : 8.78
-     
-     val_SI-SNR     : 9.98
-     
-     val_SI-SNRi    : 9.98
-     
-     val_PESQ       : 1.86
+    loss           : -14.003961563110352
+    SI-SDR         : 13.99708366394043
+    SI-SNR         : 14.004009246826172
+    SI-SNRi        : 10.568355560302734
+    PESQ           : 2.3285529613494873
+    val_loss       : -11.430553519903723
+    val_SI-SDR     : 11.427801132202148
+    val_SI-SNR     : 11.430594444274902
+    val_SI-SNRi    : 11.440431594848633
+    val_PESQ       : 2.0325489044189453
 
      
 ## Credits
