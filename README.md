@@ -71,21 +71,21 @@ Where `CONFIG_NAME` is a config from `src/configs` and `HYDRA_CONFIG_ARGUMENTS` 
 run the following command (fill in the paths to a data set):
 
 ```bash
-python3 train.py -cn="tdavss" trainer.n_epochs=100  HYDRA_CONFIG_ARGUMENTS
+python3 train.py -cn="ctc_net" trainer.n_epochs=100  HYDRA_CONFIG_ARGUMENTS
 ```
 
 ## How to run inference
 
 - To evaluate audio-only model specify *-cn "inference"* (default) and for audio-visual models use *-cn "inference_av"* as the first argument of the command
 - To evaluate your own pretrained model defined in the project, specify model config as *model=* and the path to it's weights in *from_pretrained=""* (path to the **best model** by default, the weights are loaded from gdrive)
-- To evaluate a model on your data set specify the directories to audio and/or video files in *datasets.train.audio_dir="" datasets.train.mouths_dir="" datasets.val.audio_dir="" datasets.val.mouths_dir=""*
+- To evaluate a model on your data set specify the directories to audio and/or video files in *datasets.test.audio_dir="" datasets.test.mouths_dir="" *
 - If you want to evaluate the model on less than 8 utterances, specify *dataloader.batch_size=*
 - Predicted utterances are saved in *inferencer.save_path / test*
 
 Command for inferencing the best model:
 
 ```bash
-python3 inference.py -cn "inference_av" HYDRA_CONFIG_ARGUMENTS
+python3 inference.py -cn "inference_av" model=ctc_net HYDRA_CONFIG_ARGUMENTS
 ```
 
 ## How to calculate metrics on predicted utterances
@@ -96,6 +96,8 @@ python3 inference.py -cn "inference_av" HYDRA_CONFIG_ARGUMENTS
 ```bash
 python3 compute_metrics.py --pred_dir <dir> --gt_dir <dir>
 ```
+## Link to pretrained CTC-NET model 
+[link](https://drive.google.com/file/d/1iCQUvTOF3UPaMj6hdJUmjh3yTs8SoRf0/view?usp=sharing)
 
 ## Metrics of the best model (CTCnet 100 epochs)
 
