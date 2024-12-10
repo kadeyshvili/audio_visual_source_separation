@@ -15,7 +15,8 @@ class CTCNet(nn.Module):
                  input_window_size=21,
                  latent_channels=512,
                  mouth_input_channels=1,
-                 mouth_latent_channels=64,
+                 mouth_3d_output_channels=64,
+                 mouth_latent_channels=512,
                  num_joint_repeats=3,
                  num_audio_repeats=13,
                  audio_block_input_channels=512,
@@ -35,7 +36,7 @@ class CTCNet(nn.Module):
                  ) -> None:
         super().__init__()
         self.audio_encoder = AudioEncoder(input_window_size, latent_channels)
-        self.video_emb_extractor = VideoEmbedding(mouth_input_channels, mouth_latent_channels, mouth_latent_channels)
+        self.video_emb_extractor = VideoEmbedding(mouth_input_channels, mouth_3d_output_channels, mouth_latent_channels)
         self.fusion_module = FusionNetwork(
             latent_channels,
             mouth_latent_channels,

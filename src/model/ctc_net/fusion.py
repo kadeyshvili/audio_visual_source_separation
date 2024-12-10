@@ -14,7 +14,7 @@ class GeneralSubnetwork(nn.Module):
         self.downsamplers = nn.ModuleList([])
         self.fusions = nn.ModuleList([])
         self.depth = upsampling_depth
-        self.mapper = ConvBlock(input_channels, hidden_channels, 1)
+        self.mapper = ConvBlock(input_channels, hidden_channels, 1, norm_type=norm_type)
         self.compressors.append(ConvBlock(hidden_channels,
                                           hidden_channels,
                                           kernel_size,
